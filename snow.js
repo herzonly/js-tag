@@ -1,61 +1,120 @@
-(function () {
-  if (window.__snowLoaded) return;
-  window.__snowLoaded = true;
+/**
+ * Snow Falling Effect
+ * Lightweight snow animation script for HTML5 Canvas
+ */
 
-  const canvas = document.createElement("canvas");
-  document.body.appendChild(canvas);
+(function() {
+  'use strict';
+  
+  const config = {
+    snowflakeCount: 100,
+    maxSize: 5,
+    minSize: 2,
+    maxSpeed: 2,
+    minSpeed: 0.5,
+    wind: 0.5
+  };
 
-  canvas.style.cssText = `
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    z-index:9999;
-  `;
+  class Snowflake {
+    constructor(canvas) {
+      this.canvas = canvas;
+      this.reset();
+    }
 
-  const ctx = canvas.getContext("2d");
-  let w, h;
-  let flakes = [];
+    reset() {
+      this.x = Math.random() * this.canvas.width;
+      this.y = Math.random() * -this.canvas.height;
+      this.size = Math.random() * (config.maxSize - config.minSize) + config.minSize;
+      this.speed = Math.random() * (config.maxSpeed - config.minSpeed) + config.minSpeed;
+      this.wind = Math.random() * config.wind - config.wind / 2;
+      this.opacity = Math.random() * 0.5 + 0.5;
+    }
 
-  function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-  }
-  window.addEventListener("resize", resize);
-  resize();
+    update() {
+      this.y += this.speed;
+      this.x += this.wind;
 
-  function createFlakes(n = 200) {
-    flakes = [];
-    for (let i = 0; i < n; i++) {
-      flakes.push({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        r: Math.random() * 3 + 1,
-        s: Math.random() * 2 + 0.5,
-        d: Math.random() - 0.5,
-        a: Math.random()
-      });
+      if (this.y > this.canvas.height) {
+        this.y = -10;
+        this.x = Math.random() * this.canvas.width;
+      }
+
+      if (this.x > this.canvas.width) {
+        this.x = 0;
+      } else if (this.x < 0) {
+        this.x = this.canvas.width;
+      }
+    }
+
+    draw(ctx) {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+      ctx.fill();
     }
   }
 
-  function animate() {
-    ctx.clearRect(0, 0, w, h);
-    flakes.forEach(f => {
-      f.y += f.s;
-      f.x += f.d;
+  function initSnowEffect() {
+    const canvas = document.createElement('canvas');
+    canvas.id = 'snowCanvas';
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = '9999';
+    document.body.appendChild(canvas);
 
-      if (f.y > h) {
-        f.y = -f.r;
-        f.x = Math.random() * w;
+    const ctx = canvas.getContext('2d');
+    
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const snowflakes = [];
+    for (let i = 0; i < config.snowflakeCount; i++) {
+      snowflakes.push(new Snowflake(canvas));
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      snowflakes.forEach(snowflake => {
+        snowflake.update();
+        snowflake.draw(ctx);
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    return {
+      stop: () => {
+        canvas.remove();
+      },
+      setCount: (count) => {
+        config.snowflakeCount = count;
+        snowflakes.length = 0;
+        for (let i = 0; i < count; i++) {
+          snowflakes.push(new Snowflake(canvas));
+        }
       }
-
-      ctx.beginPath();
-      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255,255,255,${f.a})`;
-      ctx.fill();
-    });
-    requestAnimationFrame(animate);
+    };
   }
 
-  createFlakes(250);
-  animate();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSnowEffect);
+  } else {
+    initSnowEffect();
+  }
+
+  window.SnowEffect = {
+    init: initSnowEffect
+  };
+
 })();
