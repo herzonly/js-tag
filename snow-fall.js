@@ -10,9 +10,9 @@
     snowflakeCount: 100,
     maxSize: 12,
     minSize: 6,
-    maxSpeed: 2,
-    minSpeed: 0.5,
-    wind: 0.5
+    maxSpeed: 5,
+    minSpeed: 2,
+    wind: 0.8
   };
 
   class Snowflake {
