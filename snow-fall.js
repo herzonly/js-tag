@@ -8,8 +8,8 @@
   
   const config = {
     snowflakeCount: 100,
-    maxSize: 5,
-    minSize: 2,
+    maxSize: 12,
+    minSize: 6,
     maxSpeed: 2,
     minSpeed: 0.5,
     wind: 0.5
