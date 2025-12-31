@@ -1,7 +1,6 @@
 (function() {
     const style = document.createElement('style');
     style.textContent = `
-        body { margin: 0; background: #000428; overflow: hidden; }
         #fireworks-container { 
             position: fixed;
             top: 0;
@@ -9,6 +8,9 @@
             width: 100vw; 
             height: 100vh;
             z-index: 9999;
+            pointer-events: none;
+        }
+        #fireworks-container canvas {
             pointer-events: none;
         }
     `;
@@ -31,7 +33,7 @@
             
             this.options = {
                 autoresize: true,
-                opacity: 0.5,
+                opacity: 0.15,
                 acceleration: 1.05,
                 friction: 0.98,
                 gravity: 1.5,
@@ -124,9 +126,10 @@
         animate() {
             if (!this.running) return;
             
-            this.ctx.globalCompositeOperation = 'destination-out';
-            this.ctx.fillStyle = `rgba(0, 0, 0, ${this.options.opacity})`;
-            this.ctx.fillRect(0, 0, this.width, this.height);
+            // Clear canvas completely for transparent effect
+            this.ctx.clearRect(0, 0, this.width, this.height);
+            
+            // Use lighter composite for bright fireworks
             this.ctx.globalCompositeOperation = 'lighter';
             
             for (let i = this.rockets.length - 1; i >= 0; i--) {
